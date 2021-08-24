@@ -1,0 +1,64 @@
+# This is a basic workflow that is manually triggered
+
+name: Test mods
+
+# Controls when the action will run. Workflow runs when manually triggered using the UI
+# or API.
+on:
+  workflow_dispatch:
+    # Inputs the workflow accepts.
+    inputs:
+      id_list:
+        # Friendly description to be shown in the UI instead of 'id_list'
+        description: 'Mods IDs to test, separated by space. Use * to test all mods (default).'
+        # Default value if no value is explicitly provided
+        default: '*'
+        # Input has to be provided for the workflow to run
+        required: true
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "test_mods"
+  test_mods:
+    name: Test mods - main job
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    - name: Install dependencies
+      run: |
+          sudo apt-get update
+          sudo apt-get install python3-pip gettext libsdl2-2.0-0 libsdl2-image-2.0-0 libsdl2-mixer-2.0-0 libsdl2-ttf-2.0-0
+          sudo pip3 install PyGithub
+    - name: Check out repository
+      uses: actions/checkout@v1
+      with:
+        fetch-depth: 1
+    - name: Download latest DDA release
+      run: |
+        python3 .github/scripts/download.py
+    - name: Unpack latest DDA release
+      run: |
+        tar -xf cata-latest.tar.gz
+    - name: Sanity check latest DDA release
+      run: |
+        cd cataclysmdda-unstable
+        ./cataclysm-tiles --check-mods dda
+    - name: Install modpack
+      # Recursively copy directory contents to data/mods/, overwrite existing files
+      run: |
+        cd cataclysmdda-unstable
+        cp -r -T ../Kenan-Modpack/ ./data/mods/
+        ls -l data/mods/
+    - name: Loadtest all mods
+      run: |
+        cd cataclysmdda-unstable
+        ./cataclysm-tiles --check-mods
+    - name: Upload debug.log
+      # Always upload the log at the end
+      if: always()
+      uses: actions/upload-artifact@v2
+      with:
+        name: debug.log
+        path: cataclysmdda-unstable/config/debug.log
