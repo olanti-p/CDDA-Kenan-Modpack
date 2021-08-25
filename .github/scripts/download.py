@@ -12,7 +12,7 @@ target_build = 'linux-tiles-x64'
 output_file = 'cata-latest.tar.gz'
 
 def download_asset(download_url):
-    print('Downloading from {}', download_url)
+    print('Downloading from {}'.format(download_url))
     resp = requests.get(download_url)
     print('Status code: {}'.format(resp.status_code))
     if not resp.ok:
@@ -32,9 +32,12 @@ if g.rate_limiting[0] < 10:
 
 repo = g.get_repo(repo)
 
-latest_release = repo.get_latest_release()
+# DDA experimentals are "pre-releases", so "latest" release is the stable
+#latest_stable = repo.get_latest_release()
+# get_releases() returns both releases and pre-releases
+latest_experimental = repo.get_releases()[0]
 
-assets = list(latest_release.get_assets())
+assets = list(latest_experimental.get_assets())
 
 for x in assets:
     if target_build in x.name:
