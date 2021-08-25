@@ -43,17 +43,17 @@ jobs:
         tar -xf cata-latest.tar.gz
     - name: Sanity check latest DDA release
       run: |
-        cd cataclysmdda-unstable
+        cd cataclysmdda-0.F
         ./cataclysm-tiles --check-mods dda
     - name: Install modpack
       # Recursively copy directory contents to data/mods/, overwrite existing files
       run: |
-        cd cataclysmdda-unstable
+        cd cataclysmdda-0.F
         cp -r -T ../Kenan-Modpack/ ./data/mods/
         ls -l data/mods/
     - name: Loadtest all mods
       run: |
-        cd cataclysmdda-unstable
+        cd cataclysmdda-0.F
         ./cataclysm-tiles --check-mods
     - name: Upload debug.log
       # Always upload the log at the end
@@ -61,4 +61,4 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: debug.log
-        path: cataclysmdda-unstable/config/debug.log
+        path: cataclysmdda-0.F/config/debug.log
